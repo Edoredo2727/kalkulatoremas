@@ -134,16 +134,19 @@
         copyTim.style.display = 'none';
         return;
       }
-      const nilaiPasar = berat * harga;
+      // Perhitungan untuk Tim Tebus Emas
+      const nilaiTaksirGlobal = berat * harga;
       const biayaTebus = pinjaman * 1.10;
-      const cashback = nilaiPasar - biayaTebus;
+      const cashbackGlobal = nilaiTaksirGlobal - biayaTebus;
+      const cashbackTim = cashbackGlobal / 2;
+      const cashbackCustomer = cashbackGlobal / 2;
+      // Perhitungan untuk Customer
+      const nilaiTaksirCustomer = nilaiTaksirGlobal - cashbackCustomer;
       // Format Customer
       const pesanCustomer = `Assalamu'alaikum Kak,\n\nBerikut ini rincian penaksiran emas Kakak:\n\n` +
-        `📦 Berat: ${berat} gram\n` +
-        `📊 Nilai Pasar Emas: ${formatRupiah(nilaiPasar)}\n\n` +
-        `📉 Jumlah Pinjaman: ${formatRupiah(pinjaman)}\n` +
-        `💳 Biaya Penebusan: ${formatRupiah(biayaTebus)}\n\n` +
-        `💎 Estimasi Cashback: ${formatRupiah(cashback > 0 ? cashback : 0)}\n\n` +
+        `📊 Nilai Taksir: ${formatRupiah(nilaiTaksirCustomer > 0 ? nilaiTaksirCustomer : 0)}\n` +
+        `💳 Biaya Penebusan: ${formatRupiah(biayaTebus)}\n` +
+        `💎 Estimasi Cashback: ${formatRupiah(cashbackCustomer > 0 ? cashbackCustomer : 0)}\n\n` +
         `Semakin cepat proses penebusan, semakin tinggi nilai yang bisa Kakak terima. Jika menunggu lebih lama, bunga pegadaian akan terus bertambah dan mengurangi nilai emas Kakak 😢\n\n` +
         `Kami siap bantu COD kapan saja. Silakan hubungi tim kami segera ya, Kak 😊\n\nSalam hangat,\nTim Tebus Emas Semarang`;
       resultCustomer.innerHTML = `<b>Pesan untuk Customer:</b><br><pre style='white-space:pre-wrap;font-family:inherit;'>${pesanCustomer}</pre>`;
@@ -158,13 +161,14 @@
       const today = new Date();
       const tgl = today.toLocaleDateString('id-ID');
       const pesanTim = `📄 Laporan Internal – Tim Tebus Emas\n\n` +
-        `Nama Customer: [Nama]\n` +
         `Tanggal Penebusan: ${tgl}\n` +
         `Berat Emas: ${berat} gram\n` +
-        `Nilai Pasar: ${formatRupiah(nilaiPasar)}\n\n` +
+        `Nilai Taksir Global: ${formatRupiah(nilaiTaksirGlobal)}\n` +
         `Jumlah Pinjaman Pegadaian: ${formatRupiah(pinjaman)}\n` +
-        `Biaya Penebusan (Pinjaman + 10%): ${formatRupiah(biayaTebus)}\n\n` +
-        `Total Cashback: ${formatRupiah(cashback > 0 ? cashback : 0)}\n` +
+        `Total Biaya Penebusan (Pinjaman + 10%): ${formatRupiah(biayaTebus)}\n` +
+        `Cashback Global: ${formatRupiah(cashbackGlobal > 0 ? cashbackGlobal : 0)}\n` +
+        `Cashback Tim Tebus: ${formatRupiah(cashbackTim > 0 ? cashbackTim : 0)}\n` +
+        `Cashback Customer: ${formatRupiah(cashbackCustomer > 0 ? cashbackCustomer : 0)}\n\n` +
         `Catatan: Semakin lama menunggu, biaya bunga terus bertambah dan margin keuntungan menurun.\n\n` +
         `✅ Siap untuk proses tebus hari ini.`;
       resultTim.innerHTML = `<b>Laporan untuk Tim Tebus:</b><br><pre style='white-space:pre-wrap;font-family:inherit;'>${pesanTim}</pre>`;

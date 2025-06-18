@@ -99,8 +99,9 @@
       <div style="margin-bottom:10px;font-size:0.98em;color:#7a6a1b;">Isi berat dan harga per gram untuk masing-masing perhiasan. Klik 'Tambah Perhiasan' jika ingin menambah item.</div>
       <div id="perhiasanList"></div>
       <button type="button" id="addPerhiasan" style="margin-bottom:18px;width:100%;background:#e0c97f;color:#7a6a1b;font-weight:600;border:none;border-radius:8px;padding:8px 0;cursor:pointer;">+ Tambah Perhiasan</button>
-      <label for="pinjaman">Jumlah Pinjaman (Rp)</label>
-      <input type="number" id="pinjaman" min="1" step="1" required>
+      <div style="margin-bottom:10px;font-size:0.98em;color:#7a6a1b;">Isi nominal pinjaman sesuai masing-masing perhiasan atau transaksi. Klik 'Tambah Pinjaman' jika ingin menambah item.</div>
+      <div id="pinjamanList"></div>
+      <button type="button" id="addPinjaman" style="margin-bottom:18px;width:100%;background:#e0c97f;color:#7a6a1b;font-weight:600;border:none;border-radius:8px;padding:8px 0;cursor:pointer;">+ Tambah Pinjaman</button>
     </form>
     <div class="result" id="resultCustomer" style="display:none;"></div>
     <button class="copy-btn" id="copyCustomer" style="display:none;">Copy Pesan Customer</button>
@@ -119,6 +120,8 @@
     const copyTim = document.getElementById('copyTim');
     const perhiasanList = document.getElementById('perhiasanList');
     const addPerhiasanBtn = document.getElementById('addPerhiasan');
+    const pinjamanList = document.getElementById('pinjamanList');
+    const addPinjamanBtn = document.getElementById('addPinjaman');
 
     function formatRupiah(angka) {
       return 'Rp. ' + angka.toLocaleString('id-ID');
@@ -170,6 +173,47 @@
     // Inisialisasi 1 perhiasan
     addPerhiasanRow();
 
+    function createPinjamanRow(idx) {
+      const div = document.createElement('div');
+      div.className = 'pinjaman-row';
+      div.style.marginBottom = '10px';
+      div.innerHTML = `<label>Pinjaman Surat ${idx+1}</label>
+        <input type="text" class="pinjaman-item" placeholder="Nominal Pinjaman (Rp)" min="1" step="1" style="width:90%;display:inline-block;" required>
+        <button type="button" class="removePinjaman" style="margin-left:4px;background:#fffbe6;color:#bfa12c;border:1px solid #e0c97f;border-radius:5px;cursor:pointer;">Hapus</button>`;
+      return div;
+    }
+
+    function updatePinjamanEvents() {
+      document.querySelectorAll('.removePinjaman').forEach(btn => {
+        btn.onclick = function() {
+          btn.parentElement.remove();
+          hitung();
+        };
+      });
+      document.querySelectorAll('.pinjaman-item').forEach(input => {
+        input.oninput = function() {
+          let val = input.value.replace(/[^\d]/g, '');
+          if(val) {
+            input.value = parseInt(val,10).toLocaleString('id-ID');
+          } else {
+            input.value = '';
+          }
+          hitung();
+        };
+      });
+    }
+
+    function addPinjamanRow() {
+      const idx = pinjamanList.children.length;
+      const row = createPinjamanRow(idx);
+      pinjamanList.appendChild(row);
+      updatePinjamanEvents();
+    }
+
+    addPinjamanBtn.onclick = addPinjamanRow;
+    // Inisialisasi 1 pinjaman
+    addPinjamanRow();
+
     function hitung() {
       // Ambil semua perhiasan
       const beratInputs = document.querySelectorAll('.berat');
@@ -183,15 +227,20 @@
         totalBerat += berat;
         nilaiTaksirGlobal += berat * harga;
       }
-      const pinjaman = parseFloat(pinjamanInput.value) || 0;
-      if (totalBerat <= 0 || nilaiTaksirGlobal <= 0 || pinjaman <= 0) {
+      // Ambil semua pinjaman
+      const pinjamanInputs = document.querySelectorAll('.pinjaman-item');
+      let totalPinjaman = 0;
+      for (let i = 0; i < pinjamanInputs.length; i++) {
+        totalPinjaman += parseFloat((pinjamanInputs[i].value || '').replace(/\./g, '').replace(/,/g, '')) || 0;
+      }
+      if (totalBerat <= 0 || nilaiTaksirGlobal <= 0 || totalPinjaman <= 0) {
         resultCustomer.style.display = 'none';
         copyCustomer.style.display = 'none';
         resultTim.style.display = 'none';
         copyTim.style.display = 'none';
         return;
       }
-      const biayaTebus = pinjaman * 1.10;
+      const biayaTebus = totalPinjaman * 1.10;
       const cashbackGlobal = nilaiTaksirGlobal - biayaTebus;
       const cashbackTim = cashbackGlobal / 2;
       const cashbackCustomer = cashbackGlobal / 2;
@@ -199,6 +248,7 @@
       // Format Customer
       const pesanCustomer = `Assalamu'alaikum Kak,\n\nBerikut ini rincian penaksiran emas Kakak:\n\n` +
         `📊 Nilai Taksir: ${formatRupiah(nilaiTaksirCustomer > 0 ? nilaiTaksirCustomer : 0)}\n` +
+        `💵 Total Biaya Pinjaman: ${formatRupiah(totalPinjaman)}\n` +
         `💳 Biaya Penebusan+Bunga Pegadaian: ${formatRupiah(biayaTebus)}\n` +
         `💎 Estimasi Cashback: ${formatRupiah(cashbackCustomer > 0 ? cashbackCustomer : 0)}\n\n` +
         `Semakin cepat proses penebusan, semakin tinggi nilai yang bisa Kakak terima. Jika menunggu lebih lama, bunga pegadaian akan terus bertambah dan mengurangi nilai emas Kakak 😢\n\n` +
@@ -218,7 +268,7 @@
         `Tanggal Penebusan: ${tgl}\n` +
         `Total Berat Emas: ${totalBerat} gram\n` +
         `Nilai Taksir Global: ${formatRupiah(nilaiTaksirGlobal)}\n` +
-        `Jumlah Pinjaman Pegadaian: ${formatRupiah(pinjaman)}\n` +
+        `Total Pinjaman Pegadaian: ${formatRupiah(totalPinjaman)}\n` +
         `Total Biaya Penebusan (Pinjaman + 10%): ${formatRupiah(biayaTebus)}\n` +
         `Cashback Global: ${formatRupiah(cashbackGlobal > 0 ? cashbackGlobal : 0)}\n` +
         `Cashback Tim Tebus: ${formatRupiah(cashbackTim > 0 ? cashbackTim : 0)}\n` +
@@ -235,7 +285,16 @@
       };
     }
 
-    pinjamanInput.addEventListener('input', hitung);
+    // Format ribuan untuk input pinjaman
+    pinjamanInput.oninput = function() {
+      let val = pinjamanInput.value.replace(/[^\d]/g, '');
+      if(val) {
+        pinjamanInput.value = parseInt(val,10).toLocaleString('id-ID');
+      } else {
+        pinjamanInput.value = '';
+      }
+      hitung();
+    };
   </script>
 </body>
 </html> 

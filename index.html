@@ -220,12 +220,16 @@
       const hargaInputs = document.querySelectorAll('.harga');
       let totalBerat = 0;
       let nilaiTaksirGlobal = 0;
+      let rincianPerhiasan = '';
       for (let i = 0; i < beratInputs.length; i++) {
         const berat = parseFloat(beratInputs[i].value) || 0;
-        // Ambil angka asli dari input harga (tanpa titik)
         const harga = parseFloat((hargaInputs[i].value || '').replace(/\./g, '').replace(/,/g, '')) || 0;
+        const subtotal = berat * harga;
+        if (berat > 0 && harga > 0) {
+          rincianPerhiasan += `${i+1}. Berat: ${berat} gram, Harga/gram: ${formatRupiah(harga)}, Subtotal: ${formatRupiah(subtotal)}\n`;
+        }
         totalBerat += berat;
-        nilaiTaksirGlobal += berat * harga;
+        nilaiTaksirGlobal += subtotal;
       }
       // Ambil semua pinjaman
       const pinjamanInputs = document.querySelectorAll('.pinjaman-item');
@@ -265,7 +269,8 @@
       const today = new Date();
       const tgl = today.toLocaleDateString('id-ID');
       const pesanTim = `📄 Laporan Internal – Tim Tebus Emas\n\n` +
-        `Tanggal Penebusan: ${tgl}\n` +
+        `Tanggal Penebusan: ${tgl}\n\n` +
+        `Rincian Perhiasan:\n${rincianPerhiasan}\n` +
         `Total Berat Emas: ${totalBerat} gram\n` +
         `Nilai Taksir Global: ${formatRupiah(nilaiTaksirGlobal)}\n` +
         `Total Pinjaman Pegadaian: ${formatRupiah(totalPinjaman)}\n` +

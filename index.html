@@ -132,8 +132,9 @@
       div.className = 'perhiasan-row';
       div.style.marginBottom = '10px';
       div.innerHTML = `<label>Perhiasan ${idx+1}</label>
-        <input type="number" class="berat" placeholder="Berat (gram)" min="0.01" step="0.01" style="width:48%;display:inline-block;margin-right:2%;" required>
-        <input type="text" class="harga" placeholder="Harga per Gram (Rp)" min="1" step="1" style="width:48%;display:inline-block;" required>
+        <input type="text" class="jenis" placeholder="Jenis Perhiasan" style="width:28%;display:inline-block;margin-right:2%;" required>
+        <input type="number" class="berat" placeholder="Berat (gram)" min="0.01" step="0.01" style="width:22%;display:inline-block;margin-right:2%;" required>
+        <input type="text" class="harga" placeholder="Harga per Gram (Rp)" min="1" step="1" style="width:38%;display:inline-block;" required>
         <button type="button" class="removePerhiasan" style="margin-left:4px;background:#fffbe6;color:#bfa12c;border:1px solid #e0c97f;border-radius:5px;cursor:pointer;">Hapus</button>`;
       return div;
     }
@@ -218,15 +219,17 @@
       // Ambil semua perhiasan
       const beratInputs = document.querySelectorAll('.berat');
       const hargaInputs = document.querySelectorAll('.harga');
+      const jenisInputs = document.querySelectorAll('.jenis');
       let totalBerat = 0;
       let nilaiTaksirGlobal = 0;
       let rincianPerhiasan = '';
       for (let i = 0; i < beratInputs.length; i++) {
         const berat = parseFloat(beratInputs[i].value) || 0;
         const harga = parseFloat((hargaInputs[i].value || '').replace(/\./g, '').replace(/,/g, '')) || 0;
+        const jenis = jenisInputs[i].value || '-';
         const subtotal = berat * harga;
         if (berat > 0 && harga > 0) {
-          rincianPerhiasan += `${i+1}. Berat: ${berat} gram, Harga/gram: ${formatRupiah(harga)}, Subtotal: ${formatRupiah(subtotal)}\n`;
+          rincianPerhiasan += `${i+1}. Jenis: ${jenis}, Berat: ${berat} gram, Harga/gram: ${formatRupiah(harga)}, Subtotal: ${formatRupiah(subtotal)}\n`;
         }
         totalBerat += berat;
         nilaiTaksirGlobal += subtotal;
